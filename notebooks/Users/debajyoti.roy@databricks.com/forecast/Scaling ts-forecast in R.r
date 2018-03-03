@@ -1,6 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Horizontal scaling of R workloads using `sparklyr`
+# MAGIC ![](https://media.licdn.com/media/gcrc/dms/image/C5612AQGdEcUWhEan4w/article-cover_image-shrink_720_1280/0?e=2119258800&v=alpha&t=w6Dd_cz9qt1zimuGHuaDiGckbuS8q9BAic-khFa3lNI)
 
 # COMMAND ----------
 
@@ -56,6 +57,7 @@ forecast_group <- function(data_group){
 
 # MAGIC %md
 # MAGIC # Single node \\(R\\)
+# MAGIC ![](https://media.licdn.com/dms/image/C5612AQFuAFK7k9msZg/article-inline_image-shrink_1500_2232/0?e=2119258800&v=alpha&t=bnLbsb06QzYdSeU7p5ahZr6YRTNzHUf3PyYOkxTA1vo)
 
 # COMMAND ----------
 
