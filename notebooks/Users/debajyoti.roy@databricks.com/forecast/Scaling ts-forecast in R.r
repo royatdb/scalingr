@@ -1,7 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Horizontal scaling of R workloads using `sparklyr`
-# MAGIC ![](https://media.licdn.com/media/gcrc/dms/image/C5612AQGdEcUWhEan4w/article-cover_image-shrink_720_1280/0?e=2119258800&v=alpha&t=w6Dd_cz9qt1zimuGHuaDiGckbuS8q9BAic-khFa3lNI)
+# MAGIC ![](https://media.licdn.com/dms/image/C5612AQGAryHIpVWYGw/article-inline_image-shrink_1500_2232/0?e=2119305600&v=alpha&t=fpo0YHH0Um_4p9VYUP5NFnWL2b_O_mZ0d9aob51RYNk)
 
 # COMMAND ----------
 
@@ -16,16 +16,16 @@ library('ggplot2')
 
 # COMMAND ----------
 
-df_a = data.frame(t=c(0:16), y=c(0,0,1,3,5,6,6,7,9,11,12,12,13,15,17,18,18))
+df_a = data.frame(t=c(0:17), y=c(0,0,1,3,5,6,6,7,9,11,12,12,13,15,17,18,18,19))
 df_a$group='a'
 
-df_b = data.frame(t=c(0:16), y=c(0,0,2,6,10,12,12,14,18,22,24,24,26,30,34,36,36))
+df_b = data.frame(t=c(0:17), y=c(0,0,2,6,10,12,12,14,18,22,24,24,26,30,34,36,36, 38))
 df_b$group='b'
 
-df_c = data.frame(t=c(0:16), y=c(0,0,0,0,1,3,5,6,6,6,6,7,9,11,12,12,12))
+df_c = data.frame(t=c(0:17), y=c(0,0,0,0,1,3,5,6,6,6,6,7,9,11,12,12,12,12))
 df_c$group='c'
 
-df_d = data.frame(t=c(0:16), y=c(4,4,5,7,9,10,10,11,13,15,16,16,17,19,21,22,22))
+df_d = data.frame(t=c(0:17), y=c(4,4,5,7,9,10,10,11,13,15,16,16,17,19,21,22,22,23))
 df_d$group='d'
 
 local_df <- rbind(df_a, df_b, df_c, df_d)
@@ -37,7 +37,7 @@ ggplot(data = local_df, aes(x = t, y = y, color = group)) + geom_point() + geom_
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Automated forecasting (`next 6 observations`) using an ARIMA model
+# MAGIC #### Seasonal ARIMA forecasting (`next 6 observations`)
 
 # COMMAND ----------
 
@@ -45,8 +45,8 @@ forecast_group <- function(data_group){
   library('forecast')
   library('tseries')
   
-  ts_group <- tsclean(data_group[, c('y')])
-  fit_group <- auto.arima(ts_group)
+  ts_group <- ts(data_group[, c('y')], frequency=6)
+  fit_group <- Arima(ts_group, order = c(0, 1, 0), seasonal = list(order = c(0, 1, 0), period = 6))
   forecast_group <- forecast(fit_group, 6)
   forecast_df_group <- data.frame(t =c(18:23), y=data.frame(forecast_group)[,1] )
   result_group <- rbind(forecast_df_group, data_group[c('t','y')])
@@ -122,6 +122,11 @@ dist_results <- dist_df %>%
 # COMMAND ----------
 
 ggplot(data = dist_results, aes(x = t, y = y, color = group)) + geom_point() + geom_line()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ![](https://media.licdn.com/media/gcrc/dms/image/C4D12AQEpH5UzTr8SkA/article-cover_image-shrink_720_1280/0?e=2119384800&v=alpha&t=ck6Xm2lRvHGHwdBnoXYUMgCQuN92CZY_zigGf8Jt7aQ)
 
 # COMMAND ----------
 
