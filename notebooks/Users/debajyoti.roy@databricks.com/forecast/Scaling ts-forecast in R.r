@@ -19,7 +19,7 @@ library('ggplot2')
 df_a = data.frame(t=c(0:17), y=c(0,0,1,3,5,6,6,7,9,11,12,12,13,15,17,18,18,19))
 df_a$group='a'
 
-df_b = data.frame(t=c(0:17), y=c(0,0,2,6,10,12,12,14,18,22,24,24,26,30,34,36,36, 38))
+df_b = data.frame(t=c(0:17), y=c(0,0,2,6,10,12,12,14,18,22,24,24,26,30,34,36,36,38))
 df_b$group='b'
 
 df_c = data.frame(t=c(0:17), y=c(0,0,0,0,1,3,5,6,6,6,6,7,9,11,12,12,12,12))
@@ -45,12 +45,11 @@ forecast_group <- function(data_group){
   library('forecast')
   library('tseries')
   
-  ts_group <- ts(data_group[, c('y')], frequency=6)
-  fit_group <- Arima(ts_group, order = c(0, 1, 0), seasonal = list(order = c(0, 1, 0), period = 6))
-  forecast_group <- forecast(fit_group, 6)
-  forecast_df_group <- data.frame(t =c(18:23), y=data.frame(forecast_group)[,1] )
-  result_group <- rbind(forecast_df_group, data_group[c('t','y')])
-  return(result_group)
+  forecast <- ts(data_group[, c('y')], frequency=6) %>%
+    Arima(order = c(0, 1, 0), seasonal = list(order = c(0, 1, 0), period = 6)) %>%
+    forecast(6)
+  forecast_df <- data.frame(t =c(18:23), y=data.frame(forecast)[,1] )
+  rbind(forecast_df, data_group[c('t','y')])
 }
 
 # COMMAND ----------
@@ -70,8 +69,8 @@ groups <- c('a','b','c', 'd')
 
 serial_results <- NULL
 for(group in groups){
-  data_group <- local_df[local_df$group == group, ]
-  result_group <- forecast_group(data_group)
+  result_group <- local_df[local_df$group == group, ] %>% 
+    forecast_group()
   result_group$group <- group
   serial_results <- rbind(serial_results, result_group)
 }
@@ -118,8 +117,6 @@ dist_results <- dist_df %>%
     forecast_group,
     group_by = 'group') %>% 
   collect()
-
-# COMMAND ----------
 
 ggplot(data = dist_results, aes(x = t, y = y, color = group)) + geom_point() + geom_line()
 
