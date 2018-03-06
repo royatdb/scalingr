@@ -65,17 +65,12 @@ forecast_group <- function(data_group){
 
 # COMMAND ----------
 
-groups <- c('a','b','c', 'd')
-
-serial_results <- NULL
-for(group in groups){
-  result_group <- local_df[local_df$group == group, ] %>% 
-    forecast_group()
-  result_group$group <- group
-  serial_results <- rbind(serial_results, result_group)
-}
-
-ggplot(data = serial_results, aes(x = t, y = y, color = group)) + geom_point() + geom_line()
+local_df %>%  
+  dplyr::group_by(group) %>%
+  tidyr::nest() %>%
+  dplyr::mutate(group_ys = purrr::map(data, forecast_group)) %>%
+  tidyr::unnest(group_ys) %>%
+  ggplot(aes(x = t, y = y, color = group)) + geom_point() + geom_line()
 
 # COMMAND ----------
 
@@ -112,13 +107,12 @@ dist_df %>%
 
 # COMMAND ----------
 
-dist_results <- dist_df %>%
+dist_df %>%
   spark_apply(
     forecast_group,
     group_by = 'group') %>% 
-  collect()
-
-ggplot(data = dist_results, aes(x = t, y = y, color = group)) + geom_point() + geom_line()
+  collect() %>%
+  ggplot(aes(x = t, y = y, color = group)) + geom_point() + geom_line()
 
 # COMMAND ----------
 
